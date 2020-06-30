@@ -44,7 +44,7 @@ public class Executor {
 	 */
 	public static String selectAttributeValue(Document document, SelectorExpression selector) {
 		String result=null;
-		DocumentPart documentPart = document.selectValue(selector,true,SelectionType.CONTENT);
+		DocumentPart documentPart = document.selectValue(selector,true,SelectionType.CONTENT,Operation.SELECT);
 		if (documentPart!=null) {
 			result = document.getBinaryString().get(documentPart);
 		} 
@@ -95,7 +95,7 @@ public class Executor {
 	 * @return
 	 */
 	public static BinaryString prepareTagDeletion(Document document, SelectorExpression selector) {
-		DocumentPart documentPart = document.selectTagString(selector);
+		DocumentPart documentPart = document.selectTagStringForDeletion(selector);
 		// String textDocument = document.generateSourceString();
 		BinaryString binaryTextDocument = document.getBinaryString();
 		binaryTextDocument.delete(documentPart.getStart(),documentPart.getStart()+documentPart.getText().length());
@@ -103,7 +103,7 @@ public class Executor {
 	}
 	
 	public static BinaryString prepareAttributeDeletion(Document document, SelectorExpression selector) {
-		DocumentPart documentPart = document.selectAttributeString(selector);
+		DocumentPart documentPart = document.selectAttributeStringForDeletion(selector);
 //		String textDocument = document.generateSourceString();
 		BinaryString binaryTextDocument = document.getBinaryString();
 		binaryTextDocument.delete(documentPart.getStart(),documentPart.getStart()+documentPart.getText().length());

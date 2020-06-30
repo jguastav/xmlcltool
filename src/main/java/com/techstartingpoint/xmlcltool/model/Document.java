@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
+import com.techstartingpoint.xmlcltool.executor.Operation;
 import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.xmlparser.CustomXmlListener;
 import com.techstartingpoint.xmlcltool.xmlparser.DocumentPart;
@@ -48,38 +49,38 @@ public class Document {
 	}
 
 	
-	public DocumentPart selectValue(SelectorExpression selectExpression,boolean excludeQuotes, SelectionType selectionType) {
-		DocumentPart documentPart = this.data.selectValue(selectExpression,excludeQuotes, selectionType); 
+	public DocumentPart selectValue(SelectorExpression selectExpression,boolean excludeQuotes, SelectionType selectionType,Operation operation) {
+		DocumentPart documentPart = this.data.selectValue(selectExpression,excludeQuotes, selectionType,operation); 
 		return documentPart;
 	}
 	
 	public DocumentPart selectValue(SelectorExpression selectExpression) {
-		return selectValue(selectExpression,false, SelectionType.CONTENT);
+		return selectValue(selectExpression,false, SelectionType.CONTENT, Operation.SELECT);
 	}
 
 	public DocumentPart selectTagContentForUpdate(SelectorExpression selector) {
-		DocumentPart result = selectValue(selector,false,SelectionType.CONTENT);
+		DocumentPart result = selectValue(selector,false,SelectionType.CONTENT,null);
 		return result;
 	}
 
 
 	public DocumentPart selectAttributeContentForUpdate(SelectorExpression selector) {
-		DocumentPart result = selectValue(selector,false, SelectionType.CONTENT);
+		DocumentPart result = selectValue(selector,false, SelectionType.CONTENT,null);
 		return result;
 	}
 
-	public DocumentPart selectTagString(SelectorExpression selector) {
-		DocumentPart result = selectValue(selector,false,SelectionType.ELEMENT);
+	public DocumentPart selectTagStringForDeletion(SelectorExpression selector) {
+		DocumentPart result = selectValue(selector,false,SelectionType.ELEMENT,null);
 		return result;
 	}
 
-	public DocumentPart selectAttributeString(SelectorExpression selector) {
-		DocumentPart result = selectValue(selector,false,SelectionType.ELEMENT);
+	public DocumentPart selectAttributeStringForDeletion(SelectorExpression selector) {
+		DocumentPart result = selectValue(selector,false,SelectionType.ELEMENT,null);
 		return result;
 	}
 
 	public DocumentPart selectPositionToInsert(SelectorExpression previousElementSelector) {
-		DocumentPart result = selectValue(previousElementSelector,false,SelectionType.AFTER);
+		DocumentPart result = selectValue(previousElementSelector,false,SelectionType.AFTER,null);
 		return result;
 	}
 

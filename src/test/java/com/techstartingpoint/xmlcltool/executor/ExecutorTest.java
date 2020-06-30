@@ -33,9 +33,9 @@ public class ExecutorTest {
 	@ParameterizedTest
 	@CsvSource(value = {"1.xml,//testSQL/Sample[2]/queryString,''",
 			"1.xml,//testSQL/Sample[2]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
-			"1.xml,//testSQL/Sample/java.net.SQL,//host1:80/pc/PCxyz.do",
+			"1.xml,//testSQL/Sample/java.net.SQL,<count>21</count>",
 			"1.xml,//testSQL/Sample[2]/java.net.SQL,//oginAppLogo.svg",
-			"1j.example,//TestPlan/hashTree/hashTree/hashTree,''"}) 
+			"1j.example,//TestPlan/hashTree/hashTree/hashTree,<count>3</count>"}) 
 	public void testSelectTagContent(String fileName,String selectorString,String expectedResult) {
 
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile(fileName);

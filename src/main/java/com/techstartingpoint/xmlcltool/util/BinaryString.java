@@ -127,10 +127,14 @@ public class BinaryString {
 		String result = null;
 		
 		if (documentPart!=null && documentPart.getText()!=null) {
-			if (documentPart.getText().length()>0) {
-				result = new String(this.bytes,documentPart.getStart(),documentPart.getText().length());
+			if (documentPart.isCount()) {
+				result = documentPart.getText();
 			} else {
-				result = "";
+				if (documentPart.getText().length()>0) {
+					result = new String(this.bytes,documentPart.getStart(),documentPart.getText().length());
+				} else {
+					result = "";
+				}
 			}
 		}
 		return result;

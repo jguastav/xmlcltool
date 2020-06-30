@@ -6,6 +6,7 @@ import java.util.List;
 import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorItem;
+import com.techstartingpoint.xmlcltool.executor.Operation;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.AttributeOutOfTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.ClosingNotOpenedTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTagException;
@@ -203,7 +204,7 @@ public class XmlDocument  {
 	}
 	
 
-	public DocumentPart selectValue(SelectorExpression selectExpression, boolean excludeQuotes, SelectionType selectionType) {
+	public DocumentPart selectValue(SelectorExpression selectExpression, boolean excludeQuotes, SelectionType selectionType, Operation operation) {
 		DocumentPart documentPart = null; 
 		boolean isRootNode = true;
 		// temporal currentNode variable
@@ -244,11 +245,19 @@ public class XmlDocument  {
 		if (item!=null && currentNodes.size()>0) {
 			if (item.getAttribute()!=null) {
 				// get the attribute
-				documentPart = currentNodes.get(0).getAttributeValueByName(item.getAttribute(),excludeQuotes,selectionType);
+				if (Operation.SELECT.equals(operation) && currentNodes.size()!=1) {
+					documentPart = generateSelectCount(currentNodes.size());
+				} else {
+					documentPart = currentNodes.get(0).getAttributeValueByName(item.getAttribute(),excludeQuotes,selectionType);
+				}
 			} else {
 				if (selectionType.equals(SelectionType.CONTENT)) {
-					// get the content of the first element
-					documentPart = currentNodes.get(0).getContent();
+					if (Operation.SELECT.equals(operation) && currentNodes.size()!=1) {
+						documentPart = generateSelectCount(currentNodes.size());
+					} else {
+						// get the content of the first element
+						documentPart = currentNodes.get(0).getContent();
+					}
 				} else if (selectionType.equals(SelectionType.ELEMENT)) {
 					documentPart = new DocumentPart(currentNodes.get(0).getStart(),currentNodes.get(0).generateFullSourceString());
 				} else if (selectionType.equals(SelectionType.AFTER)) {
@@ -257,9 +266,16 @@ public class XmlDocument  {
 					documentPart = new DocumentPart(currentNodes.get(0).getStart()+fullNodeText.length(),fullNodeText);
 				}
 			}
-		} 
+		} else {
+			documentPart = generateSelectCount(0);
+		}  
 		return documentPart;
-	} 
+	}
+	
+	private DocumentPart generateSelectCount(int size) {
+		DocumentPart result = new DocumentPart(size);
+		return result;
+	}
 	
 
 	public XmlTagNodeEntry getRoot() {
