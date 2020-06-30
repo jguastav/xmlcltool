@@ -8,7 +8,8 @@ import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorItem;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.AttributeOutOfTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.ClosingNotOpenedTagException;
-import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTag;
+import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTagException;
+import com.techstartingpoint.xmlcltool.xmlparser.exceptions.SelfCloseTagWithoutInitialTagException;
 
 /**
  * Main Document
@@ -125,7 +126,7 @@ public class XmlDocument  {
 	}
 
 	
-	public void add(XmlEndTagCharNodeEntry endTagCharNodeEntry) throws EndTagCharWithoutInitialTag {
+	public void add(XmlEndTagCharNodeEntry endTagCharNodeEntry) throws EndTagCharWithoutInitialTagException {
 		XmlTagNodeEntry parentTagNodeEntry= getLastTagNodeEntry();
 		endTagCharNodeEntry.setIdentifier(this.nextElementIndex++);
 		if (parentTagNodeEntry!=null) {
@@ -133,10 +134,27 @@ public class XmlDocument  {
 			// redundant information but facilitates navigation
 			parentTagNodeEntry.addChild(endTagCharNodeEntry);
 		} else {
-			throw new EndTagCharWithoutInitialTag(endTagCharNodeEntry);
+			throw new EndTagCharWithoutInitialTagException(endTagCharNodeEntry);
 		}
 		this.elements.add(endTagCharNodeEntry);
 	}
+	
+
+	public void add(XmlSelfCloseTagNodeEntry selfCloseTagNodeEntry) throws SelfCloseTagWithoutInitialTagException {
+		selfCloseTagNodeEntry.setIdentifier(this.nextElementIndex++);
+		XmlTagNodeEntry parentTagNodeEntry= this.tagEntryStack.pop();
+		if (parentTagNodeEntry!=null) {
+			selfCloseTagNodeEntry.setParentIndex(parentTagNodeEntry.getIdentifier());
+			// redundant information but facilitates navigation
+			parentTagNodeEntry.addChild(selfCloseTagNodeEntry);
+			
+		} else {
+			throw new SelfCloseTagWithoutInitialTagException(selfCloseTagNodeEntry);
+		}
+		this.elements.add(selfCloseTagNodeEntry);
+	}
+	
+	
 	
 	
 	public void add(XmlPrologNodeEntry nodeEntry)  {

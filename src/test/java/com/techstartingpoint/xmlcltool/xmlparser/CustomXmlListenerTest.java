@@ -51,4 +51,21 @@ public class CustomXmlListenerTest {
 			assertEquals(21,xmlDocument.getRoot().getTagsChildren().size());
 	}
 
+	
+	@Test
+	void testEnterDocumentWithSelfClosingTags() {
+			// prepare the environment
+			BinaryString documentString = ResourceUtils.getStringFromResourceFile("1j.example");
+			
+			// execute the test
+			XmlDocument xmlDocument = prepareXmlDocument(documentString.getString());
+			
+			// check the results
+			assertEquals(documentString.getString(),xmlDocument.generateSourceString());
+			
+			// there are 21 Samples inside testSql
+			assertEquals(1,xmlDocument.getRoot().getTagsChildren().size());
+	}
+	
+	
 }

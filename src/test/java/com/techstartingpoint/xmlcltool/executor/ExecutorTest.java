@@ -31,13 +31,14 @@ public class ExecutorTest {
 	 */
 	
 	@ParameterizedTest
-	@CsvSource(value = {"//testSQL/Sample[2]/queryString,''",
-			"//testSQL/Sample[2]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
-			"//testSQL/Sample/java.net.SQL,//host1:80/pc/PCxyz.do",
-			"//testSQL/Sample[2]/java.net.SQL,//oginAppLogo.svg"}) 
-	public void testSelectTagContent(String selectorString,String expectedResult) {
+	@CsvSource(value = {"1.xml,//testSQL/Sample[2]/queryString,''",
+			"1.xml,//testSQL/Sample[2]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
+			"1.xml,//testSQL/Sample/java.net.SQL,//host1:80/pc/PCxyz.do",
+			"1.xml,//testSQL/Sample[2]/java.net.SQL,//oginAppLogo.svg",
+			"1j.example,//TestPlan/hashTree/hashTree/hashTree,''"}) 
+	public void testSelectTagContent(String fileName,String selectorString,String expectedResult) {
 
-		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
+		BinaryString documentString = ResourceUtils.getStringFromResourceFile(fileName);
 		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
 		Document document = new Document(documentString, VERBOSE_SETTING);
 		String result = null;
@@ -69,11 +70,12 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 */
 	
 	@ParameterizedTest
-	@CsvSource(value = {"//testSQL/Sample[3]/responseH@class,java.lang.String",
-			"//testSQL/Sample[3]@lb,/pc/resources/logos/AppLogo.svg-9",
-			"//testSQL/Sample[3]/queryString@lb,"}) 
-	public void testSelectAttributeValue(String selectorString,String expectedResult) {
-		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
+	@CsvSource(value = {"1.xml,//testSQL/Sample[3]/responseH@class,java.lang.String",
+			"1.xml,//testSQL/Sample[3]@lb,/pc/resources/logos/AppLogo.svg-9",
+			"1.xml,//testSQL/Sample[3]/queryString@lb,",
+			"1j.example,//TestPlan/hashTree/hashTree/Arguments/collectionProp@name,Arguments.arguments"}) 
+	public void testSelectAttributeValue(String fileName,String selectorString,String expectedResult) {
+		BinaryString documentString = ResourceUtils.getStringFromResourceFile(fileName);
 		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
 		Document document = new Document(documentString, VERBOSE_SETTING);
 		String result= Executor.selectAttributeValue(document, selector);

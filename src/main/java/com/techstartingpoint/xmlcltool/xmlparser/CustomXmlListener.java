@@ -9,7 +9,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import com.techstartingpoint.xmlcltool.util.VerbosePrinter;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.AttributeOutOfTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.ClosingNotOpenedTagException;
-import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTag;
+import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTagException;
+import com.techstartingpoint.xmlcltool.xmlparser.exceptions.SelfCloseTagWithoutInitialTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLParser;
 import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLParserBaseListener;
 
@@ -26,6 +27,7 @@ public class CustomXmlListener extends XMLParserBaseListener{
 		private final String CLOSE_TAG_CHAR = ">";
 		private final String EXPECTING_NONE = "";
 		private final String FINAL_TAG_CHAR = "/";
+		private final String SELF_CLOSE_TAG = "/>";
 		private final String PROLOG_OPEN = "<?xml ";
 		private final String PROLOG_CLOSE = "?>";
 		
@@ -170,15 +172,15 @@ public class CustomXmlListener extends XMLParserBaseListener{
 		 * Element identifies TAGS in this grammar
 		 */
 		@Override public void enterElement(XMLParser.ElementContext ctx) {
-			this.printer.incrementTab();
-			
 			int position = getStartPosition(ctx);
+			this.printer.incrementTab();
+			this.printer.println("enterElement-------------");
+			this.printer.println(position,ctx.getText());
+			
 			this.currentTagNode = new XmlTagNodeEntry(position);
 			this.xmlNodeStack.push(this.currentTagNode);
 			this.tagExpectedToken = OPEN_TAG_CHAR;
 
-			this.printer.println("enterElement-------------");
-			this.printer.println(position,ctx.getText());
 		}
 		
 		/**
@@ -241,6 +243,8 @@ public class CustomXmlListener extends XMLParserBaseListener{
 		 * <p>The default implementation does nothing.</p>
 		 */
 		@Override public void exitAttribute(XMLParser.AttributeContext ctx) {
+			this.printer.println("exitAttribute-------------");
+			this.printer.println(ctx.getText());
 			if (this.currentTagNode!=null || this.expectingProlog) {
 				// attribute is added here because it could be attributes without explicit = value part
 				try {
@@ -256,8 +260,6 @@ public class CustomXmlListener extends XMLParserBaseListener{
 			} else {
 				// TODO: Throw exception
 			}
-			this.printer.println("exitAttribute-------------");
-			this.printer.println(ctx.getText());
 			
 		}
 		/**
@@ -330,17 +332,28 @@ public class CustomXmlListener extends XMLParserBaseListener{
 					this.tagExpectedToken = CLOSE_TAG_CHAR;
 					// closing open tag
 			} else if (this.currentTagNode!=null && 
-					nodeText.equals(CLOSE_TAG_CHAR) && 
-					this.tagExpectedToken.equals(CLOSE_TAG_CHAR)) {
+					this.tagExpectedToken.equals(CLOSE_TAG_CHAR) && 
+					nodeText.equals(CLOSE_TAG_CHAR)) {
 				// no more attributes are being expected
 				this.currentTagNode = null;
 				this.tagExpectedToken=EXPECTING_NONE;
 				try {
 					this.document.add(new XmlEndTagCharNodeEntry(position));
-				} catch (EndTagCharWithoutInitialTag e) {
+				} catch (EndTagCharWithoutInitialTagException e) {
 					throw new RuntimeException(e);
 				}
-				// close prolog tag
+				// self close tag
+			} else if (this.currentTagNode!=null && 
+					this.tagExpectedToken.equals(CLOSE_TAG_CHAR) && 
+					nodeText.equals(SELF_CLOSE_TAG)) {
+				this.currentTagNode = null;
+				this.tagExpectedToken   = EXPECTING_NONE;
+				try {
+					this.document.add(new XmlSelfCloseTagNodeEntry(position));
+				} catch (SelfCloseTagWithoutInitialTagException e) {
+					throw new RuntimeException(e);
+				}
+				
 			} else if (this.expectingProlog && this.tagExpectedToken.equals(PROLOG_CLOSE) && nodeText.equals(PROLOG_CLOSE)) {
 				this.expectingProlog= false;
 				this.tagExpectedToken= EXPECTING_NONE;
