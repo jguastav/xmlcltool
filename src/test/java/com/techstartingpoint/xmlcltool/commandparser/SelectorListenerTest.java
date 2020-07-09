@@ -48,7 +48,7 @@ public class SelectorListenerTest {
 	@ParameterizedTest
 	@ValueSource(strings = {"//testSQL/Sample[2]/queryString",
 			"//testSQL/Sample/java.net.SQL",
-			"//testSQL/Sample[3]/queryString@myAttribute"}) 
+			"//testSQL/Sample[4]/queryString@myAttribute"}) 
 	public void testEnterSelector(String selectorInputString) {
 		SelectorExpression selector = prepareSelectorExpression(selectorInputString);
 		assertEquals(selectorInputString,selector.generateSourceString());

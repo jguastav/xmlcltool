@@ -3,14 +3,22 @@ package com.techstartingpoint.xmlcltool.xmlparser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
 import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorItem;
 import com.techstartingpoint.xmlcltool.executor.Operation;
+import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.AttributeOutOfTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.ClosingNotOpenedTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.SelfCloseTagWithoutInitialTagException;
+import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLLexer;
+import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLParser;
 
 /**
  * Main Document
@@ -54,6 +62,23 @@ public class XmlDocument  {
 		this.prologElementId = NO_PROLOG;
 		this.rootNodeIndex = SelectorItem.NO_INDEX;
 	}
+	
+	
+	
+	public static XmlDocument generateXmlDocument(BinaryString documentString,boolean verbose ) {
+		XMLLexer xmlLexer = new XMLLexer(CharStreams.fromString(documentString.getString()));
+		
+		CommonTokenStream tokens = new CommonTokenStream(xmlLexer);
+		XMLParser parser = new XMLParser(tokens);
+		ParseTree tree = parser.document();
+		
+		ParseTreeWalker walker = new ParseTreeWalker();
+		CustomXmlListener listener= new CustomXmlListener(verbose);
+
+		walker.walk(listener, tree);
+		
+		return listener.getDocument();
+	}	
 
 	public List<XmlNodeEntry> getElements() {
 		return elements;
@@ -203,81 +228,9 @@ public class XmlDocument  {
 		return result.toString();
 	}
 	
-
-	public DocumentPart selectValue(SelectorExpression selectExpression, boolean excludeQuotes, SelectionType selectionType, Operation operation) {
-		DocumentPart documentPart = null; 
-		boolean isRootNode = true;
-		// temporal currentNode variable
-		XmlTagNodeEntry currentNode = null;
-		List<XmlTagNodeEntry> currentNodes= new ArrayList<XmlTagNodeEntry>();
-		int index = 0;
-		boolean errors = false;
-		SelectorItem item = null;
-		String result = null;
-		while (index < selectExpression.getSelectors().size() && !errors && (currentNodes.size()>0 || isRootNode)) {
-			item = selectExpression.getSelectors().get(index);
-			String nodeName=item.getNodeName();
-			if (isRootNode) {
-				// get the root node
-				currentNode = getRoot();
-				if (currentNode!=null && nodeName.equals(currentNode.getTagName())) {
-					currentNodes.add(currentNode);
-				};
-				isRootNode=false;
-			} else {
-				// choose the nodes between the childs of currentNodes
-				currentNodes = XmlTagNodeEntry.getChildren(currentNodes,nodeName);
-			}
-			// select index
-			int itemIndex = item.getIndex();
-			if (itemIndex!=SelectorItem.NO_INDEX) {
-				if (itemIndex<currentNodes.size()) {
-					currentNode = currentNodes.get(itemIndex);
-					currentNodes=new ArrayList<XmlTagNodeEntry>();
-					currentNodes.add(currentNode);
-				} else {
-					currentNodes=new ArrayList<XmlTagNodeEntry>();
-				}
-			}
-			index++;
-		}
-		// select attribute (only the last node according to grammar)
-		if (item!=null && currentNodes.size()>0) {
-			if (item.getAttribute()!=null) {
-				// get the attribute
-				if (Operation.SELECT.equals(operation) && currentNodes.size()!=1) {
-					documentPart = generateSelectCount(currentNodes.size());
-				} else {
-					documentPart = currentNodes.get(0).getAttributeValueByName(item.getAttribute(),excludeQuotes,selectionType);
-				}
-			} else {
-				if (selectionType.equals(SelectionType.CONTENT)) {
-					if (Operation.SELECT.equals(operation) && currentNodes.size()!=1) {
-						documentPart = generateSelectCount(currentNodes.size());
-					} else {
-						// get the content of the first element
-						documentPart = currentNodes.get(0).getContent();
-					}
-				} else if (selectionType.equals(SelectionType.ELEMENT)) {
-					documentPart = new DocumentPart(currentNodes.get(0).getStart(),currentNodes.get(0).generateFullSourceString());
-				} else if (selectionType.equals(SelectionType.AFTER)) {
-					String fullNodeText = currentNodes.get(0).generateFullSourceString();
-					// in this case 2nd argument of DocumentPart is present only as a reference. The position is the position of the final of the string
-					documentPart = new DocumentPart(currentNodes.get(0).getStart()+fullNodeText.length(),fullNodeText);
-				}
-			}
-		} else {
-			documentPart = generateSelectCount(0);
-		}  
-		return documentPart;
-	}
 	
-	private DocumentPart generateSelectCount(int size) {
-		DocumentPart result = new DocumentPart(size);
-		return result;
-	}
 	
-
+	
 	public XmlTagNodeEntry getRoot() {
 		return (XmlTagNodeEntry) this.elements.get(this.rootNodeIndex);
 	}

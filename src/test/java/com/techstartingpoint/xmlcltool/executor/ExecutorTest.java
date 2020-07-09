@@ -2,13 +2,19 @@ package com.techstartingpoint.xmlcltool.executor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.xml.sax.SAXException;
 
-import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
-import com.techstartingpoint.xmlcltool.model.Document;
-import com.techstartingpoint.xmlcltool.model.Selector;
+import com.techstartingpoint.xmlcltool.model.DocumentWrapper;
 import com.techstartingpoint.xmlcltool.testutils.ResourceUtils;
 import com.techstartingpoint.xmlcltool.util.BinaryString;
 
@@ -28,26 +34,30 @@ public class ExecutorTest {
 	 *  
 	 * @param selectorString
 	 * @param expectedResult
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 */
 	
 	@ParameterizedTest
-	@CsvSource(value = {"1.xml,//testSQL/Sample[2]/queryString,''",
-			"1.xml,//testSQL/Sample[2]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
+	@CsvSource(value = {"1.xml,//testSQL/Sample[3]/queryString,''",
+			"1.xml,//testSQL/Sample[3]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
 			"1.xml,//testSQL/Sample/java.net.SQL,<count>21</count>",
-			"1.xml,//testSQL/Sample[2]/java.net.SQL,//oginAppLogo.svg",
+			"1.xml,//testSQL/Sample[3]/java.net.SQL,//oginAppLogo.svg",
 			"1j.example,//TestPlan/hashTree/hashTree/hashTree,<count>3</count>"}) 
-	public void testSelectTagContent(String fileName,String selectorString,String expectedResult) {
+	public void testSelectTagContent(String fileName,String selectorString,String expectedResult) throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile(fileName);
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String result = null;
-		String charResult = Executor.selectTagContent(document, selector);
-		if (charResult!=null) {
-			result = new String(Executor.selectTagContent(document, selector));
-		}
-		assertEquals(expectedResult,result);
-		
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+			String result = null;
+			String charResult = Executor.select(document, selectorString,VERBOSE_SETTING);
+			if (charResult!=null) {
+				result = new String(Executor.select(document, selectorString, VERBOSE_SETTING));
+			}
+			assertEquals(expectedResult,result);
 	}
 
 	/*
@@ -67,18 +77,23 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 * 
 	 * @param selectorString
 	 * @param expectedResult
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 */
 	
 	@ParameterizedTest
-	@CsvSource(value = {"1.xml,//testSQL/Sample[3]/responseH@class,java.lang.String",
-			"1.xml,//testSQL/Sample[3]@lb,/pc/resources/logos/AppLogo.svg-9",
-			"1.xml,//testSQL/Sample[3]/queryString@lb,",
-			"1j.example,//TestPlan/hashTree/hashTree/Arguments/collectionProp@name,Arguments.arguments"}) 
-	public void testSelectAttributeValue(String fileName,String selectorString,String expectedResult) {
+	@CsvSource(value = {"1.xml,//testSQL/Sample[4]/responseH/@class,java.lang.String",
+			"1.xml,//testSQL/Sample[4]/@lb,/pc/resources/logos/AppLogo.svg-9",
+			"1.xml,//testSQL/Sample[4]/queryString/@lb,<count>0</count>",
+			"1j.example,//TestPlan/hashTree/hashTree/Arguments/collectionProp/@name,Arguments.arguments"}) 
+	public void testSelectAttributeValue(String fileName,String selectorString,String expectedResult) throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile(fileName);
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String result= Executor.selectAttributeValue(document, selector);
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+		String result= Executor.select(document, selectorString, VERBOSE_SETTING);
 		assertEquals(expectedResult,result);
 
 	}
@@ -88,17 +103,22 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 * it tests the update of a tag content
 	 * 
 	 * java -jar xmlcltool-0.0.1-SNAPSHOT.jar -file 1.xml -selector “//testSQL/Sample[5]/java.net.SQL” -update “A change made in xml" -backup
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 * 
 	 */
 	@Test
-	public void testPrepareTagContentUpdate() {
+	public void testPrepareTagContentUpdate() throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
 		BinaryString expectedDocumentString = ResourceUtils.getStringFromResourceFile("1-tag-updated.xml");
 		String proposedChange = "A change made in xml";
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String selectorString = "//testSQL/Sample[5]/java.net.SQL";
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		BinaryString updatedString = Executor.prepareTagContentUpdate(document, selector, proposedChange);
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+		String selectorString = "//testSQL/Sample[6]/java.net.SQL";
+		BinaryString updatedString = Executor.prepareUpdate(document, selectorString, proposedChange, VERBOSE_SETTING);
 		assertEquals(expectedDocumentString.getString(),updatedString.getString());
 	}
 	
@@ -106,19 +126,24 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 * Update attribute value
 	 * 
 	 * java -jar xmlcltool-0.0.1-SNAPSHOT.jar -file 1.xml -selector “//testSQL/Sample[8]/requestH@class” -update "\"java.lang.Boolean\"" -backup
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 * 
 	 */
 	
 	@Test
-	public void testPrepareAttributeValueUpdate() {
+	public void testPrepareAttributeValueUpdate() throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
 		BinaryString expectedDocumentString = ResourceUtils.getStringFromResourceFile("1-attribute-updated.xml");
 		// note that attribute value should include quotes if they correspond
 		String proposedChange = "\"java.lang.Boolean\"";
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String selectorString = "//testSQL/Sample[8]/requestH@class";
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		BinaryString updatedString = Executor.prepareAttributeValueUpdate(document, selector, proposedChange);
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+		String selectorString = "//testSQL/Sample[9]/requestH/@class";
+		BinaryString updatedString = Executor.prepareUpdate(document, selectorString, proposedChange, VERBOSE_SETTING);
 		assertEquals(expectedDocumentString.getString(),updatedString.getString());
 	}
 	
@@ -129,16 +154,21 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 * That's why the method is not deleting the \n after the closing tag as that line is outside the tag.
 	 * 
 	 * 	java -jar your-programmed-jar -file 1.xml -selector “//testSQL/Sample[7]” -delete -backup
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 * 
 	 */
 	@Test
-	public void testPrepareTagDeletion() {
+	public void testPrepareTagDeletion() throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
 		BinaryString expectedDocumentString = ResourceUtils.getStringFromResourceFile("1-tag-deleted.xml");
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String selectorString = "//testSQL/Sample[7]";
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		BinaryString updatedString = Executor.prepareTagDeletion(document, selector);
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+		String selectorString = "//testSQL/Sample[8]";
+		BinaryString updatedString = Executor.prepareDeletion(document, selectorString, VERBOSE_SETTING);
 		assertEquals(expectedDocumentString.getString(),updatedString.getString());
 	}
 	
@@ -147,16 +177,21 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 * Deletes an attribute and its value
 	 * 
 	 * 	java -jar your-programmed-jar -file 1.xml -selector “//testSQL/Sample[8]@ts” -delete -backup
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 * 
 	 */
 	@Test
-	public void testPrepareAttributeDeletion() {
+	public void testPrepareAttributeDeletion() throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
 		BinaryString expectedDocumentString = ResourceUtils.getStringFromResourceFile("1-attribute-deleted.xml");
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String selectorString = "//testSQL/Sample[8]@ts";
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		BinaryString updatedString = Executor.prepareAttributeDeletion(document, selector);
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+		String selectorString = "//testSQL/Sample[9]/@ts";
+		BinaryString updatedString = Executor.prepareDeletion(document, selectorString, VERBOSE_SETTING);
 		assertEquals(expectedDocumentString.getString(),updatedString.getString());
 		
 	}
@@ -167,20 +202,25 @@ java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sampl
 	 * 
 	 * 
 	 * java -jar your-programmed-jar -file testxstream.txt -selector “//testSQL/Sample[13]/requestH” -insert “<anInsertedTag att=\"12\">Something to be inserted</anInsertedTag>” -backup
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 * 
 	 * 
 	 */
 	
 	@Test
-	public void testPrepareInsert() {
+	public void testPrepareInsert() throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
 		BinaryString expectedDocumentString = ResourceUtils.getStringFromResourceFile("1-tag-inserted.xml");
 		String textToInsert = "<anInsertedTag att=\"12\">Something to be inserted</anInsertedTag>";
-		Document document = new Document(documentString, VERBOSE_SETTING);
-		String selectorString = "//testSQL/Sample[13]/requestH";
-		SelectorExpression selector = new Selector(selectorString,VERBOSE_SETTING).getData();
-		BinaryString updatedString = Executor.prepareTagInsert(document, selector, textToInsert);
+		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
+		String selectorString = "//testSQL/Sample[14]/requestH";
+		BinaryString updatedString = Executor.prepareTagInsert(document, selectorString, textToInsert, VERBOSE_SETTING);
 		assertEquals(expectedDocumentString.getString(),updatedString.getString());
 	}
-	
+
 }

@@ -5,7 +5,6 @@ import java.io.InputStream;
 
 import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.util.FileUtils;
-import com.techstartingpoint.xmlcltool.xmlparser.CustomXmlListener;
 
 public class ResourceUtils {
 	public static BinaryString getStringFromResourceFile(String resourceFileName) {

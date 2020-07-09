@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
-import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
-import com.techstartingpoint.xmlcltool.commandparser.SelectorType;
-import com.techstartingpoint.xmlcltool.model.Document;
-import com.techstartingpoint.xmlcltool.model.Selector;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.xml.sax.SAXException;
+
+import com.techstartingpoint.xmlcltool.model.DocumentWrapper;
 import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.util.FileUtils;
 import com.techstartingpoint.xmlcltool.xmlparser.DocumentPart;
@@ -25,46 +28,28 @@ public class Executor {
 	*/
 
 	
-	public static String selectTagContent(Document document, SelectorExpression selector) {
-		String result =null;
-		DocumentPart documentPart = document.selectValue(selector);
-		if (documentPart!=null) {
-			result =document.getBinaryString().get(documentPart);
-		}
-		return result;
-	}
-	
 	/**
-	 * It returns the value of the attribute
+	 * It returns the value of the attribute or the content of the tag
 	 * It removes the quotes if they are present
 	 * 
 	 * @param document
 	 * @param selector
 	 * @return
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 */
-	public static String selectAttributeValue(Document document, SelectorExpression selector) {
-		String result=null;
-		DocumentPart documentPart = document.selectValue(selector,true,SelectionType.CONTENT,Operation.SELECT);
+	public static String select(DocumentWrapper document, String xPathQuery, boolean isVerbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
+		String result = null;
+		DocumentPart documentPart = null;
+		documentPart = document.selectValue(xPathQuery,isVerbose);
 		if (documentPart!=null) {
-			result = document.getBinaryString().get(documentPart);
-		} 
+			result =document.getBinaryString().get(documentPart);
+		}
 		return result;
+		
+		
 	}
-	
-	/**
-	 * Returns the new String after applying the update
-	 */
-	public static BinaryString prepareTagContentUpdate(
-			Document document, 
-			SelectorExpression selector, 
-			String newContent) {
-		DocumentPart documentPart = document.selectTagContentForUpdate(selector);
-		// String textDocument = document.generateSourceString();
-		BinaryString binaryTextDocument = document.getBinaryString();
-		binaryTextDocument.update(documentPart.getStart(),newContent,documentPart.getStart()+documentPart.getText().length());
-		return binaryTextDocument;
-	}
-	
 	
 	/**
 	 * Calculates the resulting xml of applying an attribute change
@@ -79,36 +64,44 @@ public class Executor {
 	 * 
 	 * @return
 	 * 	Returns the resulting xml of apply the proposed change
-	 * 
+	 * Returns the new String after applying the update
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 */
-	public static BinaryString prepareAttributeValueUpdate(Document document, SelectorExpression selector, String newContent) {
-		DocumentPart documentPart = document.selectAttributeContentForUpdate(selector);
+	public static BinaryString prepareUpdate(
+			DocumentWrapper document, 
+			String xPathQuery, 
+			String newContent,
+			boolean isVerbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
+		
+		DocumentPart documentPart=null;
+		documentPart = document.selectForUpdate(xPathQuery, isVerbose);
 		// String textDocument = document.generateSourceString();
 		BinaryString binaryTextDocument = document.getBinaryString();
 		binaryTextDocument.update(documentPart.getStart(),newContent,documentPart.getStart()+documentPart.getText().length());
 		return binaryTextDocument;
 	}
 	
+
+	
 	/**
 	 * It returns the String to be deleted from the original 
 	 * It does not check if the node is mandatory
 	 * @return
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 */
-	public static BinaryString prepareTagDeletion(Document document, SelectorExpression selector) {
-		DocumentPart documentPart = document.selectTagStringForDeletion(selector);
+	public static BinaryString prepareDeletion(DocumentWrapper document, String xPathQuery,boolean isVerbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
+		DocumentPart documentPart=null;
+		documentPart = document.selectForDeletion(xPathQuery,isVerbose);
 		// String textDocument = document.generateSourceString();
 		BinaryString binaryTextDocument = document.getBinaryString();
 		binaryTextDocument.delete(documentPart.getStart(),documentPart.getStart()+documentPart.getText().length());
 		return binaryTextDocument;
 	}
 	
-	public static BinaryString prepareAttributeDeletion(Document document, SelectorExpression selector) {
-		DocumentPart documentPart = document.selectAttributeStringForDeletion(selector);
-//		String textDocument = document.generateSourceString();
-		BinaryString binaryTextDocument = document.getBinaryString();
-		binaryTextDocument.delete(documentPart.getStart(),documentPart.getStart()+documentPart.getText().length());
-		return binaryTextDocument;
-	}
 	
 	
 	/**
@@ -119,9 +112,12 @@ public class Executor {
 	 * 		The selector of the node
 	 * @param newContent
 	 * 		The content to be inserted
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 */
-	public static BinaryString prepareTagInsert(Document document, SelectorExpression previousElementSelector, String newContent) {
-		DocumentPart documentPart = document.selectPositionToInsert(previousElementSelector);
+	public static BinaryString prepareTagInsert(DocumentWrapper document, String xPathQuery, String newContent, boolean isVerbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
+		DocumentPart documentPart = document.selectPositionToInsert(xPathQuery,isVerbose);
 //		String textDocument = document.generateSourceString();
 		BinaryString binaryTextDocument = document.getBinaryString();
 		binaryTextDocument.insert(documentPart.getStart(),newContent);
@@ -132,7 +128,7 @@ public class Executor {
 	/**
 	 * 
 	 * 
-		add attribute (in node) mayb not
+		add attribute (in node) maybe not
 	 	
 	 	
 	 	add node (in node)
@@ -142,9 +138,12 @@ public class Executor {
 		
 		remove node
 		remove attribute
+	 * @throws TransformerException 
+	 * @throws TransformerFactoryConfigurationError 
+	 * @throws XPathExpressionException 
 	 * 
 	 */
-	public static void main(String[] args)  {
+	public static void main(String[] args) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException  {
 		BinaryString documentString;
 		String fileName = null;
 		try {
@@ -155,34 +154,20 @@ public class Executor {
 				documentString = FileUtils.readFromFile(fileName);
 				BinaryString updatedContent=null;
 				byte[] bytesSnapshot = documentString.getBytes();
-				SelectorExpression selector = new Selector(arguments.getSelector(),arguments.isVerbose()).getData();
-				Document document = new Document(documentString, arguments.isVerbose());
+				DocumentWrapper document = new DocumentWrapper(documentString, arguments.isVerbose());
 				switch (arguments.getOperation()) {
 				case SELECT:
-					String result = null;
-					if (selector.getType().equals(SelectorType.ATTRIBUTE)) {
-						result  = selectAttributeValue(document,selector);
-					} else if (selector.getType().equals(SelectorType.TAG)) {
-						result = selectTagContent(document,selector);
-					}
+					String result = select(document,arguments.getSelector(),arguments.isVerbose());
 					System.out.println(result);
 					break;
 				case UPDATE:
-					if (selector.getType().equals(SelectorType.ATTRIBUTE)) {
-						updatedContent = prepareAttributeValueUpdate(document,selector,arguments.getNewContent());
-					} else if (selector.getType().equals(SelectorType.TAG)) {
-						updatedContent = prepareTagContentUpdate(document,selector,arguments.getNewContent());
-					}
+					updatedContent = prepareUpdate(document,arguments.getSelector(),arguments.getNewContent(),arguments.isVerbose()); 
 					break;
 				case INSERT:
-					updatedContent = prepareTagInsert(document,selector,arguments.getNewContent());
+					updatedContent = prepareTagInsert(document,arguments.getSelector(),arguments.getNewContent(),arguments.isVerbose());
 					break;
 				case DELETE:
-					if (selector.getType().equals(SelectorType.ATTRIBUTE)) {
-						updatedContent = prepareAttributeDeletion(document,selector);
-					} else if (selector.getType().equals(SelectorType.TAG)) {
-						updatedContent = prepareTagDeletion(document,selector);
-					}
+					updatedContent = prepareDeletion(document,arguments.getSelector(),arguments.isVerbose());
 					break;
 				}
 				boolean updateFile = updatedContent!=null && !Arrays.equals(bytesSnapshot,updatedContent.getBytes());
@@ -198,6 +183,12 @@ public class Executor {
 				} 
 			}
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
