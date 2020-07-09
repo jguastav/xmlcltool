@@ -12,8 +12,8 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 
 import com.techstartingpoint.xmlcltool.model.DocumentWrapper;
-import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.util.FileUtils;
+import com.techstartingpoint.xmlcltool.xmlparser.BinaryString;
 import com.techstartingpoint.xmlcltool.xmlparser.DocumentPart;
 
 public class Executor {
@@ -44,7 +44,7 @@ public class Executor {
 		DocumentPart documentPart = null;
 		documentPart = document.selectValue(xPathQuery,isVerbose);
 		if (documentPart!=null) {
-			result =document.getBinaryString().get(documentPart);
+			result =document.getPartialDocument(documentPart);
 		}
 		return result;
 		
@@ -78,8 +78,7 @@ public class Executor {
 		DocumentPart documentPart=null;
 		documentPart = document.selectForUpdate(xPathQuery, isVerbose);
 		// String textDocument = document.generateSourceString();
-		BinaryString binaryTextDocument = document.getBinaryString();
-		binaryTextDocument.update(documentPart.getStart(),newContent,documentPart.getStart()+documentPart.getText().length());
+		BinaryString binaryTextDocument = document.getUpdatedBinaryString(documentPart.getStart(),newContent,documentPart.getStart()+documentPart.getText().length());
 		return binaryTextDocument;
 	}
 	
@@ -97,9 +96,8 @@ public class Executor {
 		DocumentPart documentPart=null;
 		documentPart = document.selectForDeletion(xPathQuery,isVerbose);
 		// String textDocument = document.generateSourceString();
-		BinaryString binaryTextDocument = document.getBinaryString();
-		binaryTextDocument.delete(documentPart.getStart(),documentPart.getStart()+documentPart.getText().length());
-		return binaryTextDocument;
+		BinaryString binaryStringAfterDeletion = document.getBinaryStringAfterDeletion(documentPart.getStart(),documentPart.getStart()+documentPart.getText().length()); 
+		return binaryStringAfterDeletion;
 	}
 	
 	
@@ -119,9 +117,8 @@ public class Executor {
 	public static BinaryString prepareTagInsert(DocumentWrapper document, String xPathQuery, String newContent, boolean isVerbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 		DocumentPart documentPart = document.selectPositionToInsert(xPathQuery,isVerbose);
 //		String textDocument = document.generateSourceString();
-		BinaryString binaryTextDocument = document.getBinaryString();
-		binaryTextDocument.insert(documentPart.getStart(),newContent);
-		return binaryTextDocument;
+		BinaryString binaryStringAfterInsert= document.getBinaryStringAfterInsert(documentPart.getStart(),newContent);
+		return binaryStringAfterInsert;
 	}
 	
 	

@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Test;
 
 import com.techstartingpoint.xmlcltool.testutils.ResourceUtils;
-import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.xmlparser.CustomXmlListener;
 import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLLexer;
 import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLParser;
@@ -19,18 +18,18 @@ import com.techstartingpoint.xmlcltool.xmlparser.generated.XMLParser;
 public class CustomXmlListenerTest {
 
 	
-	public static XmlDocument prepareXmlDocument(String documentString) {
+	public static XmlDocument prepareXmlDocument(BinaryString binaryString) {
 		
 		final boolean VERBOSE_SETTING = false;
 		
-		XMLLexer xmlLexer = new XMLLexer(CharStreams.fromString(documentString));
+		XMLLexer xmlLexer = new XMLLexer(CharStreams.fromString(binaryString.getString()));
 		
 		CommonTokenStream tokens = new CommonTokenStream(xmlLexer);
 		XMLParser parser = new XMLParser(tokens);
 		ParseTree tree = parser.document();
 		
 		ParseTreeWalker walker = new ParseTreeWalker();
-		CustomXmlListener listener= new CustomXmlListener(VERBOSE_SETTING);
+		CustomXmlListener listener= new CustomXmlListener(binaryString,VERBOSE_SETTING);
 		walker.walk(listener, tree);
 		XmlDocument result = listener.getDocument();
 		return result;
@@ -42,7 +41,7 @@ public class CustomXmlListenerTest {
 			BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
 			
 			// execute the test
-			XmlDocument xmlDocument = prepareXmlDocument(documentString.getString());
+			XmlDocument xmlDocument = prepareXmlDocument(documentString);
 			
 			// check the results
 			assertEquals(documentString.getString(),xmlDocument.generateSourceString());
@@ -58,7 +57,7 @@ public class CustomXmlListenerTest {
 			BinaryString documentString = ResourceUtils.getStringFromResourceFile("1j.example");
 			
 			// execute the test
-			XmlDocument xmlDocument = prepareXmlDocument(documentString.getString());
+			XmlDocument xmlDocument = prepareXmlDocument(documentString);
 			
 			// check the results
 			assertEquals(documentString.getString(),xmlDocument.generateSourceString());

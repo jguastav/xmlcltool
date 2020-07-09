@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 
 import com.techstartingpoint.xmlcltool.model.DocumentWrapper;
 import com.techstartingpoint.xmlcltool.testutils.ResourceUtils;
-import com.techstartingpoint.xmlcltool.util.BinaryString;
+import com.techstartingpoint.xmlcltool.xmlparser.BinaryString;
 
 public class ExecutorTest {
 

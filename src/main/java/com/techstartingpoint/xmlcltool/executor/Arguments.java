@@ -1,6 +1,5 @@
 package com.techstartingpoint.xmlcltool.executor;
 
-import com.techstartingpoint.xmlcltool.util.StringUtils;
 
 public class Arguments {
 	String fileName;

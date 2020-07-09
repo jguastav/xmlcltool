@@ -113,7 +113,8 @@ public class CustomXmlListener extends XMLParserBaseListener{
 
 	    }
 	    
-	    public CustomXmlListener(boolean verbose) {
+	    public CustomXmlListener(BinaryString binaryString,boolean verbose) {
+	    	this.document = new XmlDocument(binaryString);
 	    	this.printer=new VerbosePrinter(verbose);
 	    	this.xmlNodeStack = new XmlNodeStack();
 	    }
@@ -121,7 +122,6 @@ public class CustomXmlListener extends XMLParserBaseListener{
   
 	    @Override
 	    public void enterDocument(XMLParser.DocumentContext ctx) {
-	    	this.document= new XmlDocument();
 	    	this.xmlNodeStack= new XmlNodeStack();
 	    	this.currentAttributeNode = null;
 	    	this.currentTagNode = null;
@@ -298,7 +298,7 @@ public class CustomXmlListener extends XMLParserBaseListener{
 			this.printer.println("enterMisc-------------");
 			int position = getStartPosition(ctx);
 			this.printer.println(position,ctx.getText());
-			XmlTextNodeEntry nodeEntry= new XmlTextNodeEntry(ctx.getText(),position);
+			XmlMiscNodeEntry nodeEntry= new XmlMiscNodeEntry(ctx.getText(),position);
 			this.document.add(nodeEntry);
 			this.xmlNodeStack.push(nodeEntry);
 			
@@ -492,7 +492,7 @@ public class CustomXmlListener extends XMLParserBaseListener{
 		@Override public void exitMisc(XMLParser.MiscContext ctx) {
 			this.printer.println("exitMisc-------------");
 			this.printer.println(getStartPosition(ctx),ctx.getText());
-			XmlTextNodeEntry lastElement = (XmlTextNodeEntry) this.xmlNodeStack.pop();
+			XmlMiscNodeEntry lastElement = (XmlMiscNodeEntry) this.xmlNodeStack.pop();
 			
 		}
 

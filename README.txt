@@ -52,35 +52,27 @@ Solution Concepts
 
 When I read the invalid xml I convert it to 2 models.
 1.- An object model that allows me to traverse it and solve the previous kind of queries (We can call them as tinyXPath)
-
 2.- an equivalent string replacing each invalid character to a valid replacement (char X)
 
 the generated model in 1 has important information:The start position of each element (tag or attribute)
-
 That allows us to find the selected tag or attribute in the former file
-
-The model 2 also has important information. The string generated as model 2 is a valid XML (as you mentioned)
+The model 2 also has important information. The string generated as model 2 is a valid XML
+There is another model that is the one the document uses for performing the XPath Queries where the document is the original document replacing all content parts for their Base64 representation
+Then queries which mentions elements of content should be asked representing content as Base64. The response will be corresponding to the original content. 
 
 Applying XPath to model 2 has 2 challenges
-
 a) The java xml model has no information about start position of each element. Each element is a logical "Node" model on a hierarchical structure
-
 b) rebuilding the xml from model 2 can generate the result changing the order of the attributes
 
 Then ... the final string cannot be generated from model 2
 
 The solution I'm implementing is.
-
 1.- Convert the original file to model 1
-
 2.- Convert the origina file to model 2
-
 3.- Apply the query using Xpath on model 2
 
 The step 3 returns a specific Node (tag or attribute)
-
 4.- Based on the returned node create a query of tinyXPath that returns the same node
-
 5.- Apply the tinyXPathQuery to model 1
 
 

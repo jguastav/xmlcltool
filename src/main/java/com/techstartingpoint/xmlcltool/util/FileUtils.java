@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.techstartingpoint.xmlcltool.xmlparser.BinaryString;
+
 public class FileUtils {
 
 	public static void updateInFile(String fileName,BinaryString content,boolean isBackup,String backupFileName) throws IOException {

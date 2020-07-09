@@ -1,8 +1,6 @@
-package com.techstartingpoint.xmlcltool.util;
+package com.techstartingpoint.xmlcltool.xmlparser;
 
 import java.util.Arrays;
-
-import com.techstartingpoint.xmlcltool.xmlparser.DocumentPart;
 
 /**
  * Class to deal with special characters
@@ -27,12 +25,36 @@ public class BinaryString {
 	
 	private static final String HASH_STRING = "#";
 
-	byte[] bytes;
-	String string;
 	/**
-	 * All characters that were changed in String
+	 * The original source without modification
 	 */
-	boolean[] changed;
+	byte[] bytes;
+	
+	/**
+	 * String generated from the chars conversion of the former bytes
+	 */
+	String string;
+
+	public BinaryString(byte[] bytes) {
+		this.bytes = bytes;
+		char[] chars = new char[bytes.length];
+		for (int i=0;i<this.bytes.length;i++) {
+			boolean changeChar = false;
+			if (this.bytes[i]<=127) {
+				changeChar = isInvalidEntity(this.bytes,i);
+			} else {
+				changeChar = true;
+			}
+			if (changeChar) {
+				chars[i]='X';
+			} else {
+				chars[i]=(char) this.bytes[i];
+			}
+		}
+		this.string = new String(chars);
+	}
+	
+	
 	
 	
 	private boolean isInvalidEntity(byte[] completeSequence,int index) {
@@ -59,27 +81,6 @@ public class BinaryString {
 	}
 	
 	
-	public BinaryString(byte[] bytes) {
-		this.bytes = bytes;
-		this.changed = new boolean[bytes.length];
-		char[] chars = new char[bytes.length];
-		for (int i=0;i<this.bytes.length;i++) {
-			boolean changeChar = false;
-			if (this.bytes[i]<=127) {
-				changeChar = isInvalidEntity(this.bytes,i);
-			} else {
-				changeChar = true;
-			}
-			if (changeChar) {
-				chars[i]='X';
-				this.changed[i]=true;
-			} else {
-				chars[i]=(char) this.bytes[i];
-			}
-		}
-		this.string = new String(chars);
-	}
-	
 	public void update(int endFirstPart, String newContent, int positionSecondPart) {
 		int lengthSecondPart = this.bytes.length-positionSecondPart;
 		byte[] updatedBytes=new byte[endFirstPart+newContent.length()+lengthSecondPart];
@@ -94,9 +95,6 @@ public class BinaryString {
 		this.setBytes(updatedBytes);
 	}
 
-
-
-
 	public void delete(int endFirstPart, int startSecondPart) {
 		int secondPartLength=this.bytes.length-startSecondPart;
 		byte[] updatedBytes=new byte[this.bytes.length-(startSecondPart-endFirstPart)];
@@ -108,9 +106,7 @@ public class BinaryString {
 		this.setBytes(updatedBytes);
 	}
 
-
-
-
+	
 	public void insert(int endFirstPart, String newContent) {
 		int lengthSecondPart = this.bytes.length-endFirstPart;
 		byte[] updatedBytes=new byte[this.bytes.length+newContent.length()];
@@ -125,35 +121,7 @@ public class BinaryString {
 		this.setBytes(updatedBytes);
 	}
 
-
-	
-	
-	// GETTERS AND SETTERS
-	
-	
-	public byte[] getBytes() {
-		return bytes;
-	}
-
-	public void setBytes(byte[] bytes) {
-		this.bytes = bytes;
-	}
-
-	public String getString() {
-		return string;
-	}
-	public void setString(String string) {
-		this.string = string;
-	}
-	public boolean[] getChanged() {
-		return changed;
-	}
-	public void setChanged(boolean[] changed) {
-		this.changed = changed;
-	}
-
-	
-	public char[] getAsChars(DocumentPart documentPart) {
+	private char[] getAsChars(DocumentPart documentPart) {
 		char[] charResult = null;
 		if (documentPart!=null && documentPart.getText()!=null) {
 			if (documentPart.getText().length()>0) {
@@ -186,8 +154,22 @@ public class BinaryString {
 	}
 
 
-
-
+	// GETTERS AND SETTERS
 	
+	
+	public byte[] getBytes() {
+		return bytes;
+	}
+
+	public void setBytes(byte[] bytes) {
+		this.bytes = bytes;
+	}
+
+	public String getString() {
+		return string;
+	}
+	public void setString(String string) {
+		this.string = string;
+	}
 	
 }

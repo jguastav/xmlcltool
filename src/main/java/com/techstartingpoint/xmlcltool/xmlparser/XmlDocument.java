@@ -1,6 +1,7 @@
 package com.techstartingpoint.xmlcltool.xmlparser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -8,11 +9,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
-import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
 import com.techstartingpoint.xmlcltool.commandparser.SelectorItem;
-import com.techstartingpoint.xmlcltool.executor.Operation;
-import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.AttributeOutOfTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.ClosingNotOpenedTagException;
 import com.techstartingpoint.xmlcltool.xmlparser.exceptions.EndTagCharWithoutInitialTagException;
@@ -55,14 +52,47 @@ public class XmlDocument  {
 	 */
 	private int rootNodeIndex;
 	
-	public XmlDocument() {
+	
+	/**
+	 * Original representation of all characters as they was in the former documents
+	 * The main source of information is expressed as a Byte Array
+	 */
+	private BinaryString binaryString;
+	
+	
+	/**
+	 * Base64 representation of content
+	 */
+	private List<ContentItem> base64Content;
+
+	
+	public List<ContentItem> getBase64Content() {
+		return base64Content;
+	}
+
+
+
+	public XmlDocument(BinaryString binaryString) {
 		this.elements = new ArrayList<XmlNodeEntry>();
 		this.nextElementIndex = 0;
 		this.tagEntryStack = new XmlTagStack();
 		this.prologElementId = NO_PROLOG;
 		this.rootNodeIndex = SelectorItem.NO_INDEX;
+		this.binaryString = binaryString;
 	}
 	
+	
+	
+	private void calculateBase64Content() {
+		this.base64Content= new ArrayList<>();
+		for (XmlNodeEntry element: elements) {
+			if (element instanceof XmlTextNodeEntry) {
+				this.base64Content.add(
+						new ContentItem(element.getStart(), 
+						Arrays.copyOfRange(this.binaryString.getBytes(), element.getStart(), element.getStart()+element.getLength())));
+			}
+		} 
+	}
 	
 	
 	public static XmlDocument generateXmlDocument(BinaryString documentString,boolean verbose ) {
@@ -73,9 +103,13 @@ public class XmlDocument  {
 		ParseTree tree = parser.document();
 		
 		ParseTreeWalker walker = new ParseTreeWalker();
-		CustomXmlListener listener= new CustomXmlListener(verbose);
+		CustomXmlListener listener= new CustomXmlListener(documentString,verbose);
 
 		walker.walk(listener, tree);
+		XmlDocument returnValue = listener.getDocument();
+		returnValue.setBinaryString(documentString);
+		
+		returnValue.calculateBase64Content();
 		
 		return listener.getDocument();
 	}	
@@ -234,6 +268,56 @@ public class XmlDocument  {
 	public XmlTagNodeEntry getRoot() {
 		return (XmlTagNodeEntry) this.elements.get(this.rootNodeIndex);
 	}
+	
+	
+	public String getBase64DocumentString() {
+		StringBuilder result = new StringBuilder();
+		byte[] originalBytes=this.getBinaryString().getBytes();
+		int j=0;
+		int nextContentStart=originalBytes.length;
+		ContentItem contentItem=null;
+		if (j<this.getBase64Content().size()) {
+			contentItem=this.getBase64Content().get(j);
+			nextContentStart=contentItem.getStart();
+		}
+		int i=0;
+		while (i<originalBytes.length) {
+			String nextText = new String(Arrays.copyOfRange(originalBytes, i,nextContentStart));
+			result.append(nextText);
+			i= nextContentStart;
+			if (j<this.getBase64Content().size()) {
+				nextText = contentItem.getBase64String();
+				result.append(nextText);
+				i= nextContentStart+contentItem.getLength();
+				j++;
+				if (j<this.getBase64Content().size()) {
+					nextContentStart=this.getBase64Content().get(j).getStart();
+					contentItem=this.getBase64Content().get(j);
+				} else {
+					nextContentStart=originalBytes.length;
+					contentItem=null;
+				}
+			}
+			
+		}
+		return result.toString();
+	}
+
+	
+	
+
+	public BinaryString getBinaryString() {
+		return binaryString;
+	}
+
+
+
+	public void setBinaryString(BinaryString binaryString) {
+		this.binaryString = binaryString;
+	}
+
+
+
 
 	
 	

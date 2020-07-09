@@ -1,6 +1,8 @@
 package com.techstartingpoint.xmlcltool.model;
 
 import java.io.IOException;
+import java.util.Arrays;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -9,14 +11,14 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.SAXException;
 import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
 import com.techstartingpoint.xmlcltool.executor.Operation;
-import com.techstartingpoint.xmlcltool.util.BinaryString;
 import com.techstartingpoint.xmlcltool.wellformed.WellFormedXmlDocument;
+import com.techstartingpoint.xmlcltool.xmlparser.BinaryString;
+import com.techstartingpoint.xmlcltool.xmlparser.ContentItem;
 import com.techstartingpoint.xmlcltool.xmlparser.DocumentPart;
 import com.techstartingpoint.xmlcltool.xmlparser.XmlDocument;
 
 public class DocumentWrapper {
 	
-	BinaryString binaryString;
 	
 	/**
 	 * Document in proprietary structure model 
@@ -37,11 +39,14 @@ public class DocumentWrapper {
 	 * @throws ParserConfigurationException 
 	 */
 	public DocumentWrapper(BinaryString documentString,boolean verbose ) throws ParserConfigurationException, SAXException, IOException {
-		this.binaryString = documentString;
 		this.data = XmlDocument.generateXmlDocument(documentString, verbose);
-		this.wellFormedDocument = new WellFormedXmlDocument(documentString.getString());
+		this.wellFormedDocument = new WellFormedXmlDocument(this.data);
 	}
 	
+	
+	
+	
+
 	public String generateSourceString() {
 		return data.generateSourceString();
 	}
@@ -98,18 +103,37 @@ public class DocumentWrapper {
 		DocumentPart result = selectValue(xPathQuery, verbose,false,SelectionType.AFTER,null);
 		return result;
 	}
-	
-	
-	
-	// GETTERS & SETTERS
-	public BinaryString getBinaryString() {
-		return binaryString;
+
+	public String getPartialDocument(DocumentPart documentPart) {
+		return this.data.getBinaryString().get(documentPart);
 	}
 
-	public void setBinaryString(BinaryString binaryString) {
-		this.binaryString = binaryString;
+	public BinaryString getUpdatedBinaryString(int start, String newContent, int length) {
+		BinaryString binaryTextDocument = this.data.getBinaryString();
+		binaryTextDocument.update(start,newContent,length);
+		return binaryTextDocument;
 	}
 
+	public BinaryString getBinaryStringAfterDeletion(int start, int length) {
+		BinaryString binaryTextDocument = this.data.getBinaryString();
+		binaryTextDocument.delete(start,length);
+		return binaryTextDocument;
+	}
+
+	public BinaryString getBinaryStringAfterInsert(int start, String newContent) {
+		BinaryString binaryTextDocument = this.data.getBinaryString();
+		binaryTextDocument.insert(start,newContent);
+		return binaryTextDocument;
+	}
+
+
+
+
+
+	public WellFormedXmlDocument getWellFormedDocument() {
+		return wellFormedDocument;
+	}
+	
 	
 	
 	

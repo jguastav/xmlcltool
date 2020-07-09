@@ -20,6 +20,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.techstartingpoint.xmlcltool.model.TinyXPath;
+import com.techstartingpoint.xmlcltool.xmlparser.XmlDocument;
 
 public class WellFormedXmlDocument {
 
@@ -31,12 +32,13 @@ public class WellFormedXmlDocument {
 	
 	Document domDocument;
 	
-	public WellFormedXmlDocument(String xmlContent) throws ParserConfigurationException, SAXException, IOException {
-		InputStream xmlContentAsinputStream = new ByteArrayInputStream(xmlContent.getBytes());
+	public WellFormedXmlDocument(XmlDocument xmlDocument) throws ParserConfigurationException, SAXException, IOException {
+		String base64String = xmlDocument.getBase64DocumentString();
+		InputStream xmlContentAsinputStream = new ByteArrayInputStream(base64String.getBytes());
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = builderFactory.newDocumentBuilder();
-		Document xmlDocument = builder.parse(xmlContentAsinputStream);
-		this.domDocument = xmlDocument;
+ 		Document calculatedDomDocument = builder.parse(xmlContentAsinputStream);
+		this.domDocument = calculatedDomDocument;
 	}
 
 

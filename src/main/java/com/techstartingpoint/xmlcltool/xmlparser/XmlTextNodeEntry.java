@@ -4,7 +4,7 @@ public class XmlTextNodeEntry extends XmlNodeEntry {
 	
 	public XmlTextNodeEntry(String sourceValue,int position) {
 		super(sourceValue,position);
-		this.type=XmlElementType.BLANK;
+		this.type=XmlElementType.TEXT;
 	}
 	
 

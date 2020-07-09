@@ -7,12 +7,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
-import com.techstartingpoint.xmlcltool.commandparser.SelectorExpression;
-import com.techstartingpoint.xmlcltool.commandparser.SelectorListenerTest;
 import com.techstartingpoint.xmlcltool.executor.Operation;
 import com.techstartingpoint.xmlcltool.model.TinyXPath;
 import com.techstartingpoint.xmlcltool.testutils.ResourceUtils;
-import com.techstartingpoint.xmlcltool.util.BinaryString;
 
 public class XmlDocumentTest {
 	@ParameterizedTest
@@ -29,7 +26,7 @@ public class XmlDocumentTest {
 		// Prepare Selector
 		// Prepare Document
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile("1.xml");
-		XmlDocument xmlDocument = CustomXmlListenerTest.prepareXmlDocument(documentString.getString());
+		XmlDocument xmlDocument = CustomXmlListenerTest.prepareXmlDocument(documentString);
 		// Execute the Test
 		String content = null;
 		DocumentPart documentPart = TinyXPath.selectValue(xmlDocument,selectorInputString,VERBOSE,false,SelectionType.CONTENT,Operation.SELECT);

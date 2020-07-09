@@ -82,7 +82,7 @@ public class WellFormedXmlDocumentTest {
 		final boolean VERBOSE_SETTING = false;
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile(resourceFileName);
 		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
-		WellFormedXmlDocument xmlDocument = document.getWellFormedDocument();
+		WellFormedXmlDocument xmlDocument = new WellFormedXmlDocument(document);
 		// Execute the Test
 		String tinyXPathQuery = xmlDocument.getTinyQuery(xPathQuery);
 		NodeList xPathNodeList = xmlDocument.findNodesUsingXPath(xPathQuery);
