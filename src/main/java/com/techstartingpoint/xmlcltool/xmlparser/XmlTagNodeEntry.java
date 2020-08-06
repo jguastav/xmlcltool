@@ -121,7 +121,7 @@ public class XmlTagNodeEntry extends XmlNodeEntry {
 				start = child.getStart()+child.getSourceValue().length();
 			};
 			if (contentStarted && !(child instanceof XmlCloseTagNodeEntry) && !(child instanceof XmlEndTagCharNodeEntry)) {
-				resultString.append(child.generateSourceString());
+				resultString.append(child.generateFullSourceString());
 			}
 			
 		}

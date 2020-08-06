@@ -22,6 +22,7 @@ public class ExecutorTest {
 
 	
 	static final boolean VERBOSE_SETTING = false;
+	static final String EOL="\r\n";
 	/**
 	 * it tests the selectTagContent 
 	 * 
@@ -47,17 +48,19 @@ public class ExecutorTest {
 			"1.xml,//testSQL/Sample[3]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
 			"1.xml,//testSQL/Sample/java.net.SQL,<count>21</count>",
 			"1.xml,//testSQL/Sample[3]/java.net.SQL,//oginAppLogo.svg",
-			"1j.example,//TestPlan/hashTree/hashTree/hashTree,<count>3</count>"}) 
-	public void testSelectTagContent(String fileName,String selectorString,String expectedResult) throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
+			"1j.example,//TestPlan/hashTree/hashTree/hashTree,<count>3</count>",
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/HTTPSamplerProxy[@enabled='true'][1],<count>0</count>", // HTTPSamplerProxy does not exist
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'][1],'\\n          <elementProp name=\"sampler.Arguments\" elementType=\"Arguments\" guiclass=\"ArgumentsPanel\" testclass=\"Arguments\" enabled=\"true\">\\n            <collectionProp name=\"Arguments.arguments\"/>\\n          </elementProp>\\n          <stringProp name=\"Sampler.domain\">g.de</stringProp>\\n          <stringProp name=\"Sampler.protocol\">sql</stringProp>\\n          <stringProp name=\"Sampler.contentEncoding\">UTF-8</stringProp>\\n        '", 
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'][2],'\\n          <elementProp name=\"sampler.Arguments\" elementType=\"Arguments\" guiclass=\"ArgumentsPanel\" testclass=\"Arguments\" enabled=\"true\">\\n            <collectionProp name=\"Arguments.arguments\">\\n              <elementProp name=\"inFrame\" elementType=\"HTTPArgument\">\\n                <boolProp name=\"HTTPArgument.always_encode\">false</boolProp>\\n                <stringProp name=\"Argument.name\">inFrame</stringProp>\\n                <stringProp name=\"Argument.value\">scframe</stringProp>\\n                <stringProp name=\"Argument.metadata\">=</stringProp>\\n              </elementProp>\\n            </collectionProp>\\n          </elementProp>\\n          <stringProp name=\"Sampler.domain\">g.de</stringProp>\\n          <stringProp name=\"Sampler.port\">123</stringProp>\\n          <stringProp name=\"Sampler.protocol\">sql</stringProp>\\n          <stringProp name=\"Sampler.contentEncoding\">UTF-8</stringProp>\\n          <stringProp name=\"Sampler.path\">/c.do</stringProp>\\n        '",
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'],<count>4</count>"
+	}) 
+	public void testSelectTagContent(String fileName,String selectorString,String escapedExpectedResult) throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 
 		BinaryString documentString = ResourceUtils.getStringFromResourceFile(fileName);
 		DocumentWrapper document = new DocumentWrapper(documentString, VERBOSE_SETTING);
-			String result = null;
 			String charResult = Executor.select(document, selectorString,VERBOSE_SETTING);
-			if (charResult!=null) {
-				result = new String(Executor.select(document, selectorString, VERBOSE_SETTING));
-			}
-			assertEquals(expectedResult,result);
+			String expectedResult = escapedExpectedResult.replace("\\r","\r").replace("\\n","\n");
+			assertEquals(expectedResult,charResult);
 	}
 
 	/*
