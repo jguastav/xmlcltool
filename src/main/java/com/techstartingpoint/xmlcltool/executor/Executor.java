@@ -11,6 +11,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.xml.sax.SAXException;
 
+import com.techstartingpoint.xmlcltool.commandparser.SelectorType;
 import com.techstartingpoint.xmlcltool.model.DocumentWrapper;
 import com.techstartingpoint.xmlcltool.util.FileUtils;
 import com.techstartingpoint.xmlcltool.xmlparser.BinaryString;

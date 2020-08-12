@@ -10,6 +10,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.xml.sax.SAXException;
 import com.techstartingpoint.xmlcltool.commandparser.SelectionType;
+import com.techstartingpoint.xmlcltool.commandparser.SelectorType;
 import com.techstartingpoint.xmlcltool.executor.Operation;
 import com.techstartingpoint.xmlcltool.wellformed.WellFormedXmlDocument;
 import com.techstartingpoint.xmlcltool.xmlparser.BinaryString;
@@ -83,7 +84,12 @@ public class DocumentWrapper {
 	// MAIN PUBLIC SELECTORS SECTION
 	
 	public DocumentPart selectValue(String xPathQuery,boolean verbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
-		return selectValue(xPathQuery, verbose,true, SelectionType.CONTENT, Operation.SELECT);
+		SelectorType selectorType = SelectorType.getSelectorType(xPathQuery);
+		SelectionType selectionType = SelectionType.ELEMENT;
+		if (selectorType.equals(SelectorType.ATTRIBUTE)) {
+			selectionType = SelectionType.CONTENT;
+		}
+		return selectValue(xPathQuery, verbose,true, selectionType, Operation.SELECT);
 	}
 
 	public DocumentPart selectForUpdate(String xPathQuery, boolean isVerbose) throws XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {

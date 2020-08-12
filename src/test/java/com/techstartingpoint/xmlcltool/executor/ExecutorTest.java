@@ -44,15 +44,27 @@ public class ExecutorTest {
 	 */
 	
 	@ParameterizedTest
-	@CsvSource(value = {"1.xml,//testSQL/Sample[3]/queryString,''",
-			"1.xml,//testSQL/Sample[3]/responseH,'Content-Type: image/svg+xml\nContent-Length: 6698\n'",
+	@CsvSource(value = {"1.xml,//testSQL/Sample[3]/queryString,'<queryString class=\"java.lang.String\"></queryString>'",
+			"1.xml,//testSQL/Sample[3]/responseH,'<responseH class=\"java.lang.String\">Content-Type: image/svg+xml\nContent-Length: 6698\\n</responseH>'",
 			"1.xml,//testSQL/Sample/java.net.SQL,<count>21</count>",
-			"1.xml,//testSQL/Sample[3]/java.net.SQL,//oginAppLogo.svg",
+			"1.xml,//testSQL/Sample[3]/java.net.SQL,<java.net.SQL>//oginAppLogo.svg</java.net.SQL>",
 			"1j.example,//TestPlan/hashTree/hashTree/hashTree,<count>3</count>",
 			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/HTTPSamplerProxy[@enabled='true'][1],<count>0</count>", // HTTPSamplerProxy does not exist
-			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'][1],'\\n          <elementProp name=\"sampler.Arguments\" elementType=\"Arguments\" guiclass=\"ArgumentsPanel\" testclass=\"Arguments\" enabled=\"true\">\\n            <collectionProp name=\"Arguments.arguments\"/>\\n          </elementProp>\\n          <stringProp name=\"Sampler.domain\">g.de</stringProp>\\n          <stringProp name=\"Sampler.protocol\">sql</stringProp>\\n          <stringProp name=\"Sampler.contentEncoding\">UTF-8</stringProp>\\n        '", 
-			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'][2],'\\n          <elementProp name=\"sampler.Arguments\" elementType=\"Arguments\" guiclass=\"ArgumentsPanel\" testclass=\"Arguments\" enabled=\"true\">\\n            <collectionProp name=\"Arguments.arguments\">\\n              <elementProp name=\"inFrame\" elementType=\"HTTPArgument\">\\n                <boolProp name=\"HTTPArgument.always_encode\">false</boolProp>\\n                <stringProp name=\"Argument.name\">inFrame</stringProp>\\n                <stringProp name=\"Argument.value\">scframe</stringProp>\\n                <stringProp name=\"Argument.metadata\">=</stringProp>\\n              </elementProp>\\n            </collectionProp>\\n          </elementProp>\\n          <stringProp name=\"Sampler.domain\">g.de</stringProp>\\n          <stringProp name=\"Sampler.port\">123</stringProp>\\n          <stringProp name=\"Sampler.protocol\">sql</stringProp>\\n          <stringProp name=\"Sampler.contentEncoding\">UTF-8</stringProp>\\n          <stringProp name=\"Sampler.path\">/c.do</stringProp>\\n        '",
-			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'],<count>4</count>"
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'][1],'<SamplerProxy guiclass=\"SampleGui\" testclass=\"SamplerProxy\" testname=\"1\" enabled=\"true\">\\n          <elementProp name=\"sampler.Arguments\" elementType=\"Arguments\" guiclass=\"ArgumentsPanel\" testclass=\"Arguments\" enabled=\"true\">\\n            <collectionProp name=\"Arguments.arguments\"/>\\n          </elementProp>\\n          <stringProp name=\"Sampler.domain\">g.de</stringProp>\\n          <stringProp name=\"Sampler.protocol\">sql</stringProp>\\n          <stringProp name=\"Sampler.contentEncoding\">UTF-8</stringProp>\\n        </SamplerProxy>'", 
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'][2],'<SamplerProxy guiclass=\"TestSampleGui\" testclass=\"SamplerProxy\" testname=\"2\" enabled=\"true\">\\n          <elementProp name=\"sampler.Arguments\" elementType=\"Arguments\" guiclass=\"ArgumentsPanel\" testclass=\"Arguments\" enabled=\"true\">\\n            <collectionProp name=\"Arguments.arguments\">\\n              <elementProp name=\"inFrame\" elementType=\"HTTPArgument\">\\n                <boolProp name=\"HTTPArgument.always_encode\">false</boolProp>\\n                <stringProp name=\"Argument.name\">inFrame</stringProp>\\n                <stringProp name=\"Argument.value\">scframe</stringProp>\\n                <stringProp name=\"Argument.metadata\">=</stringProp>\\n              </elementProp>\\n            </collectionProp>\\n          </elementProp>\\n          <stringProp name=\"Sampler.domain\">g.de</stringProp>\\n          <stringProp name=\"Sampler.port\">123</stringProp>\\n          <stringProp name=\"Sampler.protocol\">sql</stringProp>\\n          <stringProp name=\"Sampler.contentEncoding\">UTF-8</stringProp>\\n          <stringProp name=\"Sampler.path\">/c.do</stringProp>\\n        </SamplerProxy>'",
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup[1]/following-sibling::hashTree/SamplerProxy[@enabled='true'],<count>4</count>",
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup,'<ThreadGroup guiclass=\"ThreadGroupGui\" testclass=\"ThreadGroup\" testname=\"ThreadGroup\" enabled=\"true\">\\n" + 
+			"        <stringProp name=\"ThreadGroup.on_sample_error\">continue</stringProp>\\n" + 
+			"        <elementProp name=\"ThreadGroup.main_controller\" elementType=\"LoopController\" guiclass=\"LoopControlPanel\" testclass=\"LoopController\" testname=\"Loop Controller\" enabled=\"true\">\\n" + 
+			"          <boolProp name=\"LoopController.continue_forever\">false</boolProp>\\n" + 
+			"          <intProp name=\"LoopController.loops\">-1</intProp>\\n" + 
+			"        </elementProp>\\n" + 
+			"        <stringProp name=\"ThreadGroup.duration\">${duration}</stringProp>\\n" + 
+			"        <stringProp name=\"ThreadGroup.delay\"/>\\n" + 
+			"        <boolProp name=\"ThreadGroup.same_user_on_next_iteration\">false</boolProp>\\n" + 
+			"      </ThreadGroup>'",
+			"1j.example,//TestPlan/hashTree/hashTree/ThreadGroup/following-sibling::hashTree/SamplerProxy[1]/stringProp[@name='Sampler.domain'],<stringProp name=\"Sampler.domain\">g.de</stringProp>",
+			
 	}) 
 	public void testSelectTagContent(String fileName,String selectorString,String escapedExpectedResult) throws ParserConfigurationException, SAXException, IOException, XPathExpressionException, TransformerFactoryConfigurationError, TransformerException {
 
